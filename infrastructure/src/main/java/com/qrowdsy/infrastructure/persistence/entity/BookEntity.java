@@ -6,13 +6,23 @@ import java.util.UUID;
 import com.qrowdsy.domain.model.Book;
 import com.qrowdsy.domain.model.id.BookId;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
+@Entity(name="book")
 public class BookEntity {
     
+    @Id
+    @GeneratedValue(strategy=GenerationType.UUID)
     private UUID id;
     private String name;
     private String author;
     private String genre;
     private Date releaseDate;
+
+    public BookEntity() {}
     
     private BookEntity(UUID id, String name, String author, String genre, Date releaseDate) {
         this.name = name;

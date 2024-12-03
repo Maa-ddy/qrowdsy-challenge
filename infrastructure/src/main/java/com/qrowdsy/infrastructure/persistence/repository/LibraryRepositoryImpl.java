@@ -3,34 +3,55 @@ package com.qrowdsy.infrastructure.persistence.repository;
 
 import java.util.List;
 
+import com.qrowdsy.domain.exception.NofFoundException;
 import com.qrowdsy.domain.exception.RepositoryException;
 import com.qrowdsy.domain.model.Address;
 import com.qrowdsy.domain.model.Library;
-import com.qrowdsy.domain.model.LibraryBooksIterator;
 import com.qrowdsy.domain.model.id.BookId;
 import com.qrowdsy.domain.model.id.LibraryId;
 import com.qrowdsy.domain.repository.LibraryRepository;
-import com.qrowdsy.domain.service.LibraryBooksSearchCriteria;
+import com.qrowdsy.infrastructure.persistence.entity.BookLibraryEntity;
+import com.qrowdsy.infrastructure.persistence.entity.LibraryEntity;
+import com.qrowdsy.infrastructure.persistence.repository.jpa.JpaBookLibraryRepository;
+import com.qrowdsy.infrastructure.persistence.repository.jpa.JpaBookRepository;
+import com.qrowdsy.infrastructure.persistence.repository.jpa.JpaLibraryRepository;
 
 public class LibraryRepositoryImpl implements LibraryRepository {
+
+    private final JpaLibraryRepository jpaLibraryRepository;
+    private final JpaBookLibraryRepository jpaBookLibraryRepository;
+    private final JpaBookRepository jpaBookRepository;
+
+    public LibraryRepositoryImpl(JpaLibraryRepository jpaLibraryRepository, JpaBookLibraryRepository jpaBookLibraryRepository, JpaBookRepository jpaBookRepository) {
+        this.jpaLibraryRepository = jpaLibraryRepository;
+        this.jpaBookLibraryRepository = jpaBookLibraryRepository;
+        this.jpaBookRepository = jpaBookRepository;
+    }
 
     @Override
     public LibraryId create(String name, String town, Address address, String phoneNumber, String emailAddress)
             throws RepositoryException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'create'");
+        var libraryEntity = jpaLibraryRepository.save(
+            new LibraryEntity(name, town, address.postCode(), phoneNumber, emailAddress)
+        );
+        return LibraryId.of(libraryEntity.getId());
     }
 
     @Override
     public Library find(LibraryId id) throws RepositoryException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'find'");
+        var library = jpaLibraryRepository.findById(id.rawId());
+        if (library.isEmpty()) {
+            throw new RepositoryException();
+        }
+        return library.get().toModel();
     }
 
     @Override
     public LibraryId update(Library library) throws RepositoryException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'update'");
+        var libraryEntity = jpaLibraryRepository.save(
+            LibraryEntity.from(library)
+        );
+        return LibraryId.of(libraryEntity.getId());
     }
 
     @Override
@@ -41,44 +62,53 @@ public class LibraryRepositoryImpl implements LibraryRepository {
 
     @Override
     public void assignBookToLibrary(LibraryId libraryId, BookId bookId) throws RepositoryException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'assignBookToLibrary'");
+        var library = jpaLibraryRepository.findById(libraryId.rawId());
+        var book = jpaBookRepository.findById(bookId.rawId());
+        if (library.isEmpty() || book.isEmpty()) {
+            throw new NofFoundException();
+        }
+        jpaBookLibraryRepository.save(new BookLibraryEntity(book.get(), library.get(), 0));
     }
 
     @Override
     public void unassignBookFromLibrary(LibraryId libraryId, BookId bookId) throws RepositoryException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'unassignBookFromLibrary'");
+        findByLibraryIdAndBookId(libraryId, bookId)
+            .forEach(bookLibraryEntity -> jpaBookLibraryRepository.delete(bookLibraryEntity));
+    }
+
+    private List<BookLibraryEntity> findByLibraryIdAndBookId(LibraryId libraryId, BookId bookId) throws NofFoundException {
+        var library = jpaLibraryRepository.findById(libraryId.rawId());
+        var book = jpaBookRepository.findById(bookId.rawId());
+        if (library.isEmpty() || book.isEmpty()) {
+            throw new NofFoundException();
+        }
+        return jpaBookLibraryRepository.findByLibraryIdAndBookId(library.get().getId(), book.get().getId());
     }
 
     @Override
     public void updateBooksQuantity(LibraryId libraryId, BookId bookId, Integer quantity) throws RepositoryException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'updateBooksQuantity'");
+        findByLibraryIdAndBookId(libraryId, bookId)
+            .forEach(bookLibraryEntity -> {
+                bookLibraryEntity.setQuantity(quantity);
+                jpaBookLibraryRepository.save(bookLibraryEntity);
+            }
+        );
     }
 
     @Override
     public boolean bookExistsInLibrary(LibraryId libraryId, BookId bookId) throws RepositoryException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'bookExistsInLibrary'");
+        return !findByLibraryIdAndBookId(libraryId, bookId).isEmpty();
     }
 
     @Override
     public Integer getBookQuantityInLibrary(LibraryId libraryId, BookId bookId) throws RepositoryException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getBookQuantityInLibrary'");
+        return findByLibraryIdAndBookId(libraryId, bookId).stream()
+            .reduce(0, (a, b) -> a + b.getQuantity(), Integer::sum);
     }
 
     @Override
     public List<String> getGenresInLibrary(LibraryId libraryId) throws RepositoryException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getGenresInLibrary'");
+        return jpaBookLibraryRepository.findGenresIdLibrary(libraryId.rawId());
     }
-
-    @Override
-    public LibraryBooksIterator filterLibraryBooks(LibraryId libraryId, LibraryBooksSearchCriteria criteria)
-            throws RepositoryException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'filterLibraryBooks'");
-    }
+    
 }

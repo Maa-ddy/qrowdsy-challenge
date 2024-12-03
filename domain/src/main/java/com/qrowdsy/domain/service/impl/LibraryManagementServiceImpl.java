@@ -16,7 +16,6 @@ public class LibraryManagementServiceImpl implements LibraryManagementService {
 
     @Override
     public void addBooksToLibrary(LibraryId libraryId, BookId bookId, Integer quantity) throws DomainException {
-        //TODO validate book not found, library not found, quantity >= 0
         if (!libraryRepository.bookExistsInLibrary(libraryId, bookId)) {
             libraryRepository.assignBookToLibrary(libraryId, bookId);
         }
@@ -25,15 +24,12 @@ public class LibraryManagementServiceImpl implements LibraryManagementService {
 
     @Override
     public void leaseBookFromLibrary(LibraryId libraryId, BookId bookId) throws DomainException {
-        //TODO validate book not found, library not found
         var oldQuantity = libraryRepository.getBookQuantityInLibrary(libraryId, bookId);
-        // TODO validate > 0
         libraryRepository.updateBooksQuantity(libraryId, bookId, oldQuantity - 1);
     }
 
     @Override
     public void returnBookToLibrary(LibraryId libraryId, BookId bookId) throws DomainException {
-        //TODO validate book not found, library not found
         var oldQuantity = libraryRepository.getBookQuantityInLibrary(libraryId, bookId);
         libraryRepository.updateBooksQuantity(libraryId, bookId, oldQuantity + 1);
     }

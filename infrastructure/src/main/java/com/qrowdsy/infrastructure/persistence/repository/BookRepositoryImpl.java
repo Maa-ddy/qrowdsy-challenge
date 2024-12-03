@@ -2,6 +2,9 @@ package com.qrowdsy.infrastructure.persistence.repository;
 
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.data.domain.PageRequest;
 
 import com.qrowdsy.domain.exception.NofFoundException;
 import com.qrowdsy.domain.exception.RepositoryException;
@@ -11,14 +14,17 @@ import com.qrowdsy.domain.model.id.BookId;
 import com.qrowdsy.domain.model.id.LibraryId;
 import com.qrowdsy.domain.repository.BookRepository;
 import com.qrowdsy.infrastructure.persistence.entity.BookEntity;
+import com.qrowdsy.infrastructure.persistence.repository.jpa.JpaBookLibraryRepository;
 import com.qrowdsy.infrastructure.persistence.repository.jpa.JpaBookRepository;
 
 public class BookRepositoryImpl implements BookRepository {
 
     private final JpaBookRepository jpaBookRepository;
+    private final JpaBookLibraryRepository jpaBookLibraryRepository;
 
-    public BookRepositoryImpl(JpaBookRepository jpaBookRepository) {
+    public BookRepositoryImpl(JpaBookRepository jpaBookRepository, JpaBookLibraryRepository jpaBookLibraryRepository) {
         this.jpaBookRepository = jpaBookRepository;
+        this.jpaBookLibraryRepository = jpaBookLibraryRepository;
     }
 
     @Override
@@ -57,14 +63,18 @@ public class BookRepositoryImpl implements BookRepository {
 
     @Override
     public List<Library> findLibrariesHavingBook(BookId bookId) throws RepositoryException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'findLibrariesHavingBook'");
+        return jpaBookLibraryRepository.findByBookId(bookId.rawId())
+            .stream()
+            .map(bookLibraryEntity -> bookLibraryEntity.getLibrary().toModel())
+            .collect(Collectors.toList());
     }
 
     @Override
     public List<Book> findBooksByLibrary(LibraryId libraryId, Integer offset, Integer limit)
             throws RepositoryException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'findBooksByLibrary'");
+        return jpaBookLibraryRepository.findByLibraryId(libraryId.rawId(), PageRequest.of(offset * limit, limit))
+            .stream()
+            .map(bookLibraryEntity -> bookLibraryEntity.getBook().toModel())
+            .collect(Collectors.toList());
     }
 }

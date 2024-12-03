@@ -7,7 +7,6 @@ import com.qrowdsy.domain.model.LibraryBooksIterator;
 import com.qrowdsy.domain.model.id.LibraryId;
 import com.qrowdsy.domain.repository.BookRepository;
 import com.qrowdsy.domain.repository.LibraryRepository;
-import com.qrowdsy.domain.service.LibraryBooksSearchCriteria;
 import com.qrowdsy.domain.service.LibrarySearchService;
 
 public class LibrarySearchServiceImpl implements LibrarySearchService {
@@ -28,11 +27,6 @@ public class LibrarySearchServiceImpl implements LibrarySearchService {
     @Override
     public List<String> getGenresInLibrary(LibraryId libraryId) throws DomainException {
         return libraryRepository.getGenresInLibrary(libraryId);
-    }
-
-    @Override
-    public LibraryBooksIterator filterLibraryBooks(LibraryId libraryId, LibraryBooksSearchCriteria criteria) {
-        return filterLibraryBooks(libraryId, criteria);
     }
     
 }
