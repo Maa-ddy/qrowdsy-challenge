@@ -26,7 +26,7 @@ public class LibraryManagementServiceImpl implements LibraryManagementService {
     public void leaseBookFromLibrary(LibraryId libraryId, BookId bookId) throws DomainException {
         var oldQuantity = libraryRepository.getBookQuantityInLibrary(libraryId, bookId);
         if (oldQuantity <= 0) {
-            throw new DomainException();
+            throw new DomainException("There are no more books in the library");
         }
         libraryRepository.updateBooksQuantity(libraryId, bookId, oldQuantity - 1);
     }

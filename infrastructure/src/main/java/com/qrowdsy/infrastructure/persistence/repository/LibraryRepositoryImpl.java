@@ -42,7 +42,7 @@ public class LibraryRepositoryImpl implements LibraryRepository {
     public Library find(LibraryId id) throws RepositoryException {
         var library = jpaLibraryRepository.findById(id.rawId());
         if (library.isEmpty()) {
-            throw new RepositoryException();
+            throw new RepositoryException("Library with id " + id.rawId() + " was not found");
         }
         return library.get().toModel();
     }
@@ -60,7 +60,7 @@ public class LibraryRepositoryImpl implements LibraryRepository {
         var library = jpaLibraryRepository.findById(libraryId.rawId());
         var book = jpaBookRepository.findById(bookId.rawId());
         if (library.isEmpty() || book.isEmpty()) {
-            throw new NofFoundException();
+            throw new RepositoryException("Library with id " + libraryId.rawId() + " was not found");
         }
         jpaBookLibraryRepository.save(new BookLibraryEntity(book.get(), library.get(), 0));
     }
@@ -71,11 +71,11 @@ public class LibraryRepositoryImpl implements LibraryRepository {
             .forEach(bookLibraryEntity -> jpaBookLibraryRepository.delete(bookLibraryEntity));
     }
 
-    private List<BookLibraryEntity> findByLibraryIdAndBookId(LibraryId libraryId, BookId bookId) throws NofFoundException {
+    private List<BookLibraryEntity> findByLibraryIdAndBookId(LibraryId libraryId, BookId bookId) throws RepositoryException {
         var library = jpaLibraryRepository.findById(libraryId.rawId());
         var book = jpaBookRepository.findById(bookId.rawId());
         if (library.isEmpty() || book.isEmpty()) {
-            throw new NofFoundException();
+            throw new RepositoryException("Library with id " + libraryId.rawId() + " was not found");
         }
         return jpaBookLibraryRepository.findByLibraryIdAndBookId(library.get().getId(), book.get().getId());
     }

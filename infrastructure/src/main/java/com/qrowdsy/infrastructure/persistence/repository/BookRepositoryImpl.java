@@ -45,7 +45,7 @@ public class BookRepositoryImpl implements BookRepository {
     public Book find(BookId id) throws RepositoryException {
         var bookEntity = jpaBookRepository.findById(id.rawId());
         if (bookEntity.isEmpty()) {
-            throw new NofFoundException();
+            throw new NofFoundException("Book with id " + id.rawId() + " was not found");
         }
         return bookEntity.get().toModel();
     }
@@ -55,7 +55,7 @@ public class BookRepositoryImpl implements BookRepository {
         try {
             jpaBookRepository.deleteById(id.rawId());
         } catch (Exception e) {
-            throw new NofFoundException();
+            throw new NofFoundException("Book with id " + id.rawId() + " was not found");
         }
     }
 
