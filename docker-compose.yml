@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres_qrowdsy
+    ports: 
+      - '5432:5432'
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: qrowdsy
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 64M
+    networks:
+      - qrowdsy_network
+    
+  backend:
+    depends_on:
+      - postgres
+    build:
+      dockerfile: Dockerfile
+    container_name: qrowdsy_backend
+    ports:
+      - '8200:8200'
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 64M
+    networks:
+      - qrowdsy_network
+  
+networks:
+  qrowdsy_network:
+    driver: bridge
+    ipam:
+      driver: bridge
+      config:
+        -
+          subnet: 172.15.0.0/16
