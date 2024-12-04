@@ -17,4 +17,6 @@ public interface BookRepository {
 
     List<Library> findLibrariesHavingBook(BookId bookId) throws RepositoryException;
     List<Book> findBooksByLibrary(LibraryId libraryId, Integer offset, Integer limit) throws RepositoryException;
+    List<Book> filterBooks(String criteria, Integer offset, Integer limit) throws RepositoryException;
+    
 }

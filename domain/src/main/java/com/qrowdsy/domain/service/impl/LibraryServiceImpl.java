@@ -8,6 +8,8 @@ import com.qrowdsy.domain.repository.LibraryRepository;
 import com.qrowdsy.domain.service.LibraryService;
 import static com.qrowdsy.domain.service.Utils.getOrDefault;
 
+import java.util.List;
+
 public class LibraryServiceImpl implements LibraryService {
 
     private final LibraryRepository libraryRepository;
@@ -38,6 +40,10 @@ public class LibraryServiceImpl implements LibraryService {
     @Override
     public Library findLibrary(LibraryId id) throws DomainException {
         return this.libraryRepository.find(id);
+    }
+
+    public List<Library> findAllLibraries() throws DomainException {
+        return this.libraryRepository.findAll();
     }
     
 }

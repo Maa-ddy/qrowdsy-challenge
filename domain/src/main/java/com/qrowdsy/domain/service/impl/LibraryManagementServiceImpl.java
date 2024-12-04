@@ -25,6 +25,9 @@ public class LibraryManagementServiceImpl implements LibraryManagementService {
     @Override
     public void leaseBookFromLibrary(LibraryId libraryId, BookId bookId) throws DomainException {
         var oldQuantity = libraryRepository.getBookQuantityInLibrary(libraryId, bookId);
+        if (oldQuantity <= 0) {
+            throw new DomainException();
+        }
         libraryRepository.updateBooksQuantity(libraryId, bookId, oldQuantity - 1);
     }
 
@@ -32,6 +35,14 @@ public class LibraryManagementServiceImpl implements LibraryManagementService {
     public void returnBookToLibrary(LibraryId libraryId, BookId bookId) throws DomainException {
         var oldQuantity = libraryRepository.getBookQuantityInLibrary(libraryId, bookId);
         libraryRepository.updateBooksQuantity(libraryId, bookId, oldQuantity + 1);
+    }
+
+    public void assignBookToLibrary(LibraryId libraryId, BookId bookId) throws DomainException {
+        libraryRepository.assignBookToLibrary(libraryId, bookId);
+    }
+
+    public void unassignBookFromLibrary(LibraryId libraryId, BookId bookId) throws DomainException {
+        libraryRepository.unassignBookFromLibrary(libraryId, bookId);
     }
     
 }

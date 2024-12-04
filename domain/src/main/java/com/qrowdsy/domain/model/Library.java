@@ -11,7 +11,7 @@ public class Library {
     private final String emailAddress;
 
     private Library(LibraryId id, String name, Address address, String phoneNumber, String emailAddress) {
-        this.id = new LibraryId();
+        this.id = id;
         this.name = name;
         this.address = address;
         this.phoneNumber = phoneNumber;

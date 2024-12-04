@@ -13,7 +13,6 @@ public interface LibraryRepository {
     LibraryId create(String name, String town, Address address, String phoneNumber, String emailAddress) throws RepositoryException;
     Library find(LibraryId id) throws RepositoryException;
     LibraryId update(Library library) throws RepositoryException;
-    void delete(LibraryId id) throws RepositoryException;
 
     void assignBookToLibrary(LibraryId libraryId, BookId bookId) throws RepositoryException;
     void unassignBookFromLibrary(LibraryId libraryId, BookId bookId) throws RepositoryException;
@@ -21,4 +20,6 @@ public interface LibraryRepository {
     boolean bookExistsInLibrary(LibraryId libraryId, BookId bookId) throws RepositoryException;
     Integer getBookQuantityInLibrary(LibraryId libraryId, BookId bookId) throws RepositoryException;
     List<String> getGenresInLibrary(LibraryId libraryId) throws RepositoryException;
+
+    List<Library> findAll() throws RepositoryException;
 }

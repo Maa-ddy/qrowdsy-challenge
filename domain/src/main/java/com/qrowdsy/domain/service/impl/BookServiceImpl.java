@@ -4,6 +4,7 @@ import java.util.Date;
 
 import com.qrowdsy.domain.exception.DomainException;
 import com.qrowdsy.domain.model.Book;
+import com.qrowdsy.domain.model.FilteredBooksIterator;
 import com.qrowdsy.domain.model.id.BookId;
 import com.qrowdsy.domain.repository.BookRepository;
 import com.qrowdsy.domain.repository.LibraryRepository;
@@ -44,6 +45,11 @@ public class BookServiceImpl implements BookService {
             libraryRepository.unassignBookFromLibrary(library.id(), id);
         }
         bookRepository.delete(id);
+    }
+
+    @Override
+    public FilteredBooksIterator filterBooks(String criteria) throws DomainException {
+        return new FilteredBooksIterator(bookRepository, criteria);
     }
     
 }

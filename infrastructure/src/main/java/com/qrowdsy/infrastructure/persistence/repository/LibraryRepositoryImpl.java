@@ -2,6 +2,7 @@ package com.qrowdsy.infrastructure.persistence.repository;
 
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.qrowdsy.domain.exception.NofFoundException;
 import com.qrowdsy.domain.exception.RepositoryException;
@@ -55,12 +56,6 @@ public class LibraryRepositoryImpl implements LibraryRepository {
     }
 
     @Override
-    public void delete(LibraryId id) throws RepositoryException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'delete'");
-    }
-
-    @Override
     public void assignBookToLibrary(LibraryId libraryId, BookId bookId) throws RepositoryException {
         var library = jpaLibraryRepository.findById(libraryId.rawId());
         var book = jpaBookRepository.findById(bookId.rawId());
@@ -97,7 +92,12 @@ public class LibraryRepositoryImpl implements LibraryRepository {
 
     @Override
     public boolean bookExistsInLibrary(LibraryId libraryId, BookId bookId) throws RepositoryException {
-        return !findByLibraryIdAndBookId(libraryId, bookId).isEmpty();
+        try {
+            
+            return !findByLibraryIdAndBookId(libraryId, bookId).isEmpty();
+        } catch (NofFoundException e) {
+            return false;
+        }
     }
 
     @Override
@@ -109,6 +109,13 @@ public class LibraryRepositoryImpl implements LibraryRepository {
     @Override
     public List<String> getGenresInLibrary(LibraryId libraryId) throws RepositoryException {
         return jpaBookLibraryRepository.findGenresIdLibrary(libraryId.rawId());
+    }
+
+    public List<Library> findAll() throws RepositoryException {
+        // can be done with iterator pattern as well
+        return jpaLibraryRepository.findAll().stream()
+            .map(LibraryEntity::toModel)
+            .collect(Collectors.toList());
     }
     
 }

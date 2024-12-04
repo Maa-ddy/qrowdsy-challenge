@@ -37,9 +37,7 @@ public class BookRepositoryImpl implements BookRepository {
 
     @Override
     public BookId update(Book book) throws RepositoryException {
-        var bookEntity = jpaBookRepository.save(
-            BookEntity.from(book)
-        );
+        var bookEntity = jpaBookRepository.save(BookEntity.from(book));
         return BookId.of(bookEntity.getId());
     }
 
@@ -72,9 +70,16 @@ public class BookRepositoryImpl implements BookRepository {
     @Override
     public List<Book> findBooksByLibrary(LibraryId libraryId, Integer offset, Integer limit)
             throws RepositoryException {
-        return jpaBookLibraryRepository.findByLibraryId(libraryId.rawId(), PageRequest.of(offset * limit, limit))
+        return jpaBookLibraryRepository.findByLibraryId(libraryId.rawId(), PageRequest.of(offset, limit))
             .stream()
             .map(bookLibraryEntity -> bookLibraryEntity.getBook().toModel())
+            .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Book> filterBooks(String criteria, Integer offset, Integer limit) throws RepositoryException {
+        return jpaBookRepository.filterByCriteria(criteria, offset, limit).stream()
+            .map(BookEntity::toModel)
             .collect(Collectors.toList());
     }
 }
