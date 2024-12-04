@@ -1,5 +1,8 @@
 package com.qrowdsy.domain.service.impl;
 
+import com.qrowdsy.domain.event.BookLeasedEvent;
+import com.qrowdsy.domain.event.Event;
+import com.qrowdsy.domain.event.queue.EventQueue;
 import com.qrowdsy.domain.exception.DomainException;
 import com.qrowdsy.domain.model.id.BookId;
 import com.qrowdsy.domain.model.id.LibraryId;
@@ -9,9 +12,11 @@ import com.qrowdsy.domain.service.LibraryManagementService;
 public class LibraryManagementServiceImpl implements LibraryManagementService {
 
     private final LibraryRepository libraryRepository;
+    private final EventQueue<Event> queue;
 
-    public LibraryManagementServiceImpl(LibraryRepository libraryRepository) {
+    public LibraryManagementServiceImpl(LibraryRepository libraryRepository, EventQueue<Event> queue) {
         this.libraryRepository = libraryRepository;
+        this.queue = queue;
     }
 
     @Override
@@ -29,6 +34,7 @@ public class LibraryManagementServiceImpl implements LibraryManagementService {
             throw new DomainException("There are no more books in the library");
         }
         libraryRepository.updateBooksQuantity(libraryId, bookId, oldQuantity - 1);
+        queue.publish(new BookLeasedEvent(bookId));
     }
 
     @Override

@@ -2,6 +2,9 @@ package com.qrowdsy.domain.service.impl;
 
 import java.util.Date;
 
+import com.qrowdsy.domain.event.BookCreatedEvent;
+import com.qrowdsy.domain.event.Event;
+import com.qrowdsy.domain.event.queue.EventQueue;
 import com.qrowdsy.domain.exception.DomainException;
 import com.qrowdsy.domain.model.Book;
 import com.qrowdsy.domain.model.FilteredBooksIterator;
@@ -15,15 +18,19 @@ public class BookServiceImpl implements BookService {
 
     private final BookRepository bookRepository;
     private final LibraryRepository libraryRepository;
+    private final EventQueue<Event> queue;
 
-    public BookServiceImpl(BookRepository bookRepository, LibraryRepository libraryRepository) {
+    public BookServiceImpl(BookRepository bookRepository, LibraryRepository libraryRepository, EventQueue<Event> queue) {
         this.bookRepository = bookRepository;
         this.libraryRepository = libraryRepository;
+        this.queue = queue;
     }
 
     @Override
     public BookId createBook(String name, String author, String genre, Date releaseDate) throws DomainException {
-        return bookRepository.create(name, author, genre, releaseDate);
+        var bookId = bookRepository.create(name, author, genre, releaseDate);
+        queue.publish(new BookCreatedEvent(bookId));
+        return bookId;
     }
 
     @Override
